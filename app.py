@@ -1,11 +1,12 @@
-
 import streamlit as st
 import requests
 
+# Cấu hình giao diện rộng
 st.set_page_config(page_title="VietEdu AI Voice", page_icon="🎙️", layout="wide")
 st.title("🎬 AI Video & Voice Studio")
 st.subheader("🔊 Lồng tiếng AI đa giọng đọc")
 
+# Kiểm tra API Key từ Secrets
 if "FPT_API_KEY" not in st.secrets:
     st.error("❌ Lỗi: Thầy/cô chưa lưu FPT_API_KEY trong phần Secrets!")
     st.stop()
@@ -29,7 +30,7 @@ VOICE_MAP = {
     "Linh San": "linhsan", "Minh Quang": "minhquang", "Lan Nhi": "lannhi"
 }
 
-# Lấy giá trị giọng đọc cuối cùng được chọn (logic ưu tiên đơn giản)
+# Ưu tiên lấy giọng được chọn ở cột miền Nam nếu có, nếu không lấy miền Bắc
 selected_voice = VOICE_MAP[v_south] if v_south else VOICE_MAP[v_north]
 
 st.write("---")
@@ -39,6 +40,7 @@ if st.button("🚀 Chuyển thành giọng nói"):
     if text_input.strip():
         with st.spinner("Đang xử lý..."):
             headers = {"api-key": fpt_key, "speed": str(speed), "voice": selected_voice}
+            # Sử dụng API FPT v5 mới nhất
             req = requests.post("https://api.fpt.ai/hmi/tts/v5", data=text_input.encode('utf-8'), headers=headers)
             if req.status_code == 200:
                 audio_url = req.json().get("async")
