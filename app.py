@@ -1,7 +1,10 @@
 ﻿import streamlit as st
 from gtts import gTTS # Thư viện tạo giọng nói miễn phí
 import os
+import os
 
+# Thêm dòng này để Vercel không báo lỗi cổng (Port)
+port = int(os.environ.get("PORT", 8501))
 st.set_page_config(page_title="App AI cua Thay", layout="wide")
 
 st.title("🎬 AI Video & Voice Studio")
