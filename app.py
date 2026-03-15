@@ -1,50 +1,27 @@
-import streamlit as st
-import requests
+﻿import streamlit as st
+from gtts import gTTS # Thư viện tạo giọng nói miễn phí
+import os
 
-# Cấu hình giao diện rộng
-st.set_page_config(page_title="VietEdu AI Voice", page_icon="🎙️", layout="wide")
+st.set_page_config(page_title="App AI cua Thay", layout="wide")
+
 st.title("🎬 AI Video & Voice Studio")
-st.subheader("🔊 Lồng tiếng AI đa giọng đọc")
 
-# Kiểm tra API Key từ Secrets
-if "FPT_API_KEY" not in st.secrets:
-    st.error("❌ Lỗi: Thầy/cô chưa lưu FPT_API_KEY trong phần Secrets!")
-    st.stop()
+# Ngăn chức năng lồng tiếng
+st.header("🔊 Lồng tiếng AI (Miễn phí)")
+text_to_speak = st.text_area("Thầy dán đoạn văn cần lồng tiếng vào đây:", 
+                             value="Chào mừng quý Thầy Cô đến với VietEdu Smart-Pro 2026.")
 
-fpt_key = st.secrets["FPT_API_KEY"]
-
-st.write("### 🗣️ Chọn giọng đọc (Speech)")
-col_v1, col_v2 = st.columns(2)
-
-with col_v1:
-    v_north = st.radio("Giọng miền Bắc:", ["Ban Mai", "Thu Minh", "Lê Minh"])
-    v_central = st.radio("Giọng miền Trung:", ["Mỹ An", "Gia Huy", "Ngọc Lam"])
-
-with col_v2:
-    v_south = st.radio("Giọng miền Nam:", ["Linh San", "Minh Quang", "Lan Nhi"])
-    speed = st.slider("Tốc độ đọc (Speed):", 0.7, 1.5, 1.0, 0.1)
-
-VOICE_MAP = {
-    "Ban Mai": "banmai", "Thu Minh": "thuminh", "Lê Minh": "leminh",
-    "Mỹ An": "myan", "Gia Huy": "giahuy", "Ngọc Lam": "ngoclam",
-    "Linh San": "linhsan", "Minh Quang": "minhquang", "Lan Nhi": "lannhi"
-}
-
-# Ưu tiên lấy giọng được chọn ở cột miền Nam nếu có, nếu không lấy miền Bắc
-selected_voice = VOICE_MAP[v_south] if v_south else VOICE_MAP[v_north]
-
-st.write("---")
-text_input = st.text_area("Thầy/cô dán văn bản cần lồng tiếng vào đây:", height=200)
-
-if st.button("🚀 Chuyển thành giọng nói"):
-    if text_input.strip():
-        with st.spinner("Đang xử lý..."):
-            headers = {"api-key": fpt_key, "speed": str(speed), "voice": selected_voice}
-            # Sử dụng API FPT v5 mới nhất
-            req = requests.post("https://api.fpt.ai/hmi/tts/v5", data=text_input.encode('utf-8'), headers=headers)
-            if req.status_code == 200:
-                audio_url = req.json().get("async")
-                st.success("✅ Đã xong!")
-                st.audio(audio_url)
-            else:
-                st.error("Lỗi kết nối FPT AI. Thầy/cô kiểm tra lại API Key nhé.")
+if st.button("Chuyển thành giọng nói"):
+    if text_to_speak:
+        with st.spinner("Đang chuyển ngữ..."):
+            # Tạo giọng nói tiếng Việt
+            tts = gTTS(text=text_to_speak, lang='vi')
+            tts.save("voice.mp3")
+            
+            # Phát file nhạc ngay trên App
+            audio_file = open('voice.mp3', 'rb')
+            audio_bytes = audio_file.read()
+            st.audio(audio_bytes, format='audio/mp3')
+            st.success("Đã xong! Thầy có thể nhấn vào 3 dấu chấm ở thanh nhạc để tải về máy.")
+    else:
+        st.warning("Thầy chưa nhập chữ ạ.")
